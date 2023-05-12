@@ -98,15 +98,6 @@ def kfold_validation(data, Lambda, degree, splits):
     return training_loss, validation_loss
 
 
-def shuffle(x, y):
-        t = np.hstack((x, y.reshape((y.shape[0], 1))))
-        t_shuffed = np.random.permutation(t)
-        y_shuffled = t_shuffed[:, -1]
-        x_shuffled = t_shuffed[:, :-1]
-
-        return x_shuffled, y_shuffled
-
-
 def plot_loss(training_losses, validation_losses):
     scale = np.arange(100)
     plt.plot(scale, np.flip(training_losses), color='red', label='training')
@@ -124,8 +115,8 @@ def plot_loss(training_losses, validation_losses):
     plt.show()
 
 
-def test_lambda(Lambda, degree):
-    data = np.load('dataset_poly_test.npy')
+def test_lambda(Lambda, degree, dataset='dataset_poly_test.npy'):
+    data = np.load(dataset)
     x = data[:, :-1]
     y = data[:, -1]
     w = polynomial_regression(x, y, Lambda, degree)
@@ -155,6 +146,7 @@ if __name__ == '__main__':
     plot_loss(training_losses, validation_losses)
     best_lambda = lambdas[np.argmin(validation_losses)]
 
+    test_lambda(best_lambda, degree, dataset='dataset_poly_train.npy')
     test_lambda(best_lambda, degree)
 
 
