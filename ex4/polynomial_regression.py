@@ -56,15 +56,8 @@ def polynomial_regression(x, y, Lambda, degree):
 
 
 def generate_poly_matrix(x, degree):
-    n, m = x.shape  # for generality
-    x_data = x
-    X0 = np.ones((n, 1))
-
-    for i in range(1, degree + 1):
-        x_stack = np.power(x_data, degree)
-        X0 = np.hstack((x_stack, X0))
-
-    return X0
+    v = np.polynomial.polynomial.polyvander(x, degree)
+    return v[:, 0, ::-1]
 
 
 def regression(x, y):
@@ -82,7 +75,7 @@ def regression(x, y):
 def loss(x, y, w, Lambda, degree):
     x = generate_poly_matrix(x, degree)
 
-    return (np.linalg.norm(x @ w - y, 2))**2 / (2*len(x)) + Lambda * np.linalg.norm(w, 2)**2
+    return (np.linalg.norm(x @ w - y, 2))**2 / (2*len(x)) + (Lambda / 2) * np.linalg.norm(w, 2)**2
 
 
 def kfold_validation(data, Lambda, degree, splits):
@@ -97,7 +90,7 @@ def kfold_validation(data, Lambda, degree, splits):
         training_errors = np.append(training_errors, training_loss)
 
         x = data[i][:, :-1]
-        y = data[i][:, :-1]
+        y = data[i][:, -1]
         validation_loss = loss(x, y, w, Lambda, degree)
         validation_errors = np.append(validation_errors, validation_loss)
     training_loss = np.mean(training_errors)
@@ -105,53 +98,55 @@ def kfold_validation(data, Lambda, degree, splits):
     return training_loss, validation_loss
 
 
-def old_datasets():
-    Lambda = 0.001
-    x, y = load_data('dataset0.npy')
-    w = regression(x, y)
-    print(w)
-    w = polynomial_regression(x, y, Lambda)
-    print(w)
-    plot(x, y, w)
+def plot_loss(training_losses, validation_losses):
+    scale = np.arange(100)
+    plt.plot(scale, np.flip(training_losses), color='red', label='training')
+    plt.plot(scale, np.flip(validation_losses), color='blue', label='validation')
+    plt.legend()
+    plt.xlabel('Complexity')
+    plt.ylabel('Loss')
 
-    x, y = load_data('dataset1.npy')
-    w = regression(x, y)
-    print(w)
-    w = polynomial_regression(x, y, Lambda)
-    print(w)
-    plot(x, y, w)
+    ticks = range(0, 100, 33)
+    logscale = np.logspace(-9, 3, 4)
+    plt.xticks(ticks, logscale)
 
-    x, y = load_data('dataset2.npy')
-    w = regression(x, y)
-    print(w)
-    w = polynomial_regression(x, y, Lambda)
-    print(w)
-    plot(x, y, w)
+    plt.tight_layout()
+    plt.savefig('fig.pdf')
+    plt.show()
 
-    x, y = load_data('dataset3.npy')
-    w = regression(x, y)
-    print(w)
-    w = polynomial_regression(x, y, Lambda)
-    print(w)
-    plot(x, y, w)
 
-    x, y = load_data('dataset4.npy')
-    w = regression(x, y)
-    print(w)
-    w = polynomial_regression(x, y, Lambda)
-    print(w)
-    print(np.linalg.norm(x @ w[:-1] + w[-1] - y))
+def test_lambda(Lambda, degree, dataset='dataset_poly_test.npy'):
+    data = np.load(dataset)
+    x = data[:, :-1]
+    y = data[:, -1]
+    w = polynomial_regression(x, y, Lambda, degree)
+    plot(x, y, w)
+    print("Lambda:")
+    print(Lambda)
+    print("Test loss:")
+    print(loss(x, y, w, Lambda, degree))
 
 
 if __name__ == '__main__':
-    Lambda = 0.001
     degree = 6
-    splits = 5
+    splits = 10
     data = np.load('dataset_poly_train.npy')
     np.random.shuffle(data)
     data = np.split(data, splits)
 
-    for i in range(100):
+    lambdas = np.logspace(-9, 3, 100)
+
+    training_losses = []
+    validation_losses = []
+    for Lambda in lambdas:
         training_loss, validation_loss = kfold_validation(data, Lambda, degree, splits)
-        print(training_loss, validation_loss)
+        training_losses.append(training_loss)
+        validation_losses.append(validation_loss)
+
+    plot_loss(training_losses, validation_losses)
+    best_lambda = lambdas[np.argmin(validation_losses)]
+
+    test_lambda(best_lambda, degree, dataset='dataset_poly_train.npy')
+    test_lambda(best_lambda, degree)
+
 
