@@ -112,6 +112,12 @@ def plot_loss(training_losses, validation_losses):
     plt.plot(scale, np.flip(training_losses), color='red', label='training')
     plt.plot(scale, np.flip(validation_losses), color='blue', label='validation')
     plt.legend()
+    plt.xlabel('Complexity')
+    plt.ylabel('Loss')
+
+    ticks = range(0, 100, 33)
+    logscale = np.logspace(-9, 3, 4)
+    plt.xticks(ticks, logscale)
 
     plt.tight_layout()
     plt.savefig('fig.pdf')
