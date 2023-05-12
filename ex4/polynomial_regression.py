@@ -78,22 +78,19 @@ def loss(x, y, w, Lambda, degree):
     return (np.linalg.norm(x @ w - y, 2))**2 / (2*len(x)) + (Lambda / 2) * np.linalg.norm(w, 2)**2
 
 
-def kfold_validation(x, y, Lambda, degree, splits):
-    x_shuffled, y_shuffled = shuffle(x, y)
+def kfold_validation(data, Lambda, degree, splits):
     training_errors = np.array([])
     validation_errors = np.array([])
     for i in range(splits):
-        train_mask = np.arange(10) != i
-        val_mask = np.arange(10) == i
-        x = x_shuffled[train_mask]
-        y = y_shuffled[train_mask]
+        x = np.concatenate(np.delete(data, i, axis=0))[:, :-1]
+        y = np.concatenate(np.delete(data, i, axis=0))[:, -1]
         w = polynomial_regression(x, y, Lambda, degree)
 
         training_loss = loss(x, y, w, Lambda, degree)
         training_errors = np.append(training_errors, training_loss)
 
-        x = x_shuffled[val_mask]
-        y = y_shuffled[val_mask]
+        x = data[i][:, :-1]
+        y = data[i][:, -1]
         validation_loss = loss(x, y, w, Lambda, degree)
         validation_errors = np.append(validation_errors, validation_loss)
     training_loss = np.mean(training_errors)
@@ -136,16 +133,16 @@ def test_lambda(Lambda, degree):
 if __name__ == '__main__':
     degree = 6
     splits = 10
-    x, y = load_data('dataset_poly_train.npy')
-    # np.random.shuffle(data)
-    # data = np.split(data, splits)
+    data = np.load('dataset_poly_train.npy')
+    np.random.shuffle(data)
+    data = np.split(data, splits)
 
     lambdas = np.logspace(-9, 3, 100)
 
     training_losses = []
     validation_losses = []
     for Lambda in lambdas:
-        training_loss, validation_loss = kfold_validation(x, y, Lambda, degree, splits)
+        training_loss, validation_loss = kfold_validation(data, Lambda, degree, splits)
         training_losses.append(training_loss)
         validation_losses.append(validation_loss)
 
