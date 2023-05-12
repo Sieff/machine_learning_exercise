@@ -153,4 +153,5 @@ if __name__ == '__main__':
 
     for i in range(100):
         training_loss, validation_loss = kfold_validation(data, Lambda, degree, splits)
+        print(training_loss, validation_loss)
 
