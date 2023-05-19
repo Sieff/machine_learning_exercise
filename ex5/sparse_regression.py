@@ -57,7 +57,6 @@ if __name__ == '__main__':
     clf = linear_model.LassoCV(eps=1e-3, n_alphas=1000)
     clf.fit(x, y)
     print(clf.coef_)
-    train_y_pred = clf.predict(x)
     alphas, coefs, _ = clf.path(x,y)
     print('Training score', clf.score(x, y))
     print('Test score', clf.score(x_test, y_test))
