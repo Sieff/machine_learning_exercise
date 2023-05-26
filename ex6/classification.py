@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import svm
+from sklearn.linear_model import LogisticRegression
 
 
 def load_data(name, m=None):
@@ -32,19 +33,19 @@ def plot_numbers(numb, tag, rng=None):
     plt.show()
 
 
-if __name__ == '__main__':
+def regression(model):
     x_train, y_train = load_data('dataset_numbers_train.npy')
     plot_numbers(x_train, y_train)
 
-    clf = svm.SVC()
+    clf = model
     clf.fit(x_train, y_train)
 
     train_predictions = clf.predict(x_train)
     correct = train_predictions == y_train
     score = np.sum(correct) / len(y_train)
 
-    print('Train score is: ...')
-    print(score)
+    print('Train score (accuracy) is:', score)
+    print('Number of incorrectly labled datapoints:', len(y_train) - np.sum(correct))
 
     x_test, y_test = load_data('dataset_numbers_test.npy')
 
@@ -52,5 +53,13 @@ if __name__ == '__main__':
     correct = test_predictions == y_test
     score = np.sum(correct) / len(y_test)
 
-    print('Test score is: ...')
-    print(score)
+    print('Test score (accuracy) is:', score)
+    print('Number of incorrectly labled datapoints:', len(y_test) - np.sum(correct))
+
+
+if __name__ == '__main__':
+    print('Logistical regression:')
+    regression(LogisticRegression(random_state=0))
+
+    print('SVM:')
+    regression(svm.SVC())
