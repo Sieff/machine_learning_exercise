@@ -2,6 +2,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn import svm
+
 
 def load_data(name, m=None):
     data = np.load(name)
@@ -9,6 +11,7 @@ def load_data(name, m=None):
     y = data[:,-1]
 
     return (x, y)
+
 
 def plot_numbers(numb, tag, rng=None):
     if rng is None:
@@ -33,9 +36,21 @@ if __name__ == '__main__':
     x_train, y_train = load_data('dataset_numbers_train.npy')
     plot_numbers(x_train, y_train)
 
-    ...
+    clf = svm.SVC()
+    clf.fit(x_train, y_train)
+
+    train_predictions = clf.predict(x_train)
+    correct = train_predictions == y_train
+    score = np.sum(correct) / len(y_train)
 
     print('Train score is: ...')
+    print(score)
 
     x_test, y_test = load_data('dataset_numbers_test.npy')
+
+    test_predictions = clf.predict(x_test)
+    correct = test_predictions == y_test
+    score = np.sum(correct) / len(y_test)
+
     print('Test score is: ...')
+    print(score)
