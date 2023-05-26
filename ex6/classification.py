@@ -35,13 +35,18 @@ def plot_numbers(numb, tag, rng=None):
 
 def regression(model):
     x_train, y_train = load_data('dataset_numbers_train.npy')
-    plot_numbers(x_train, y_train)
 
     clf = model
     clf.fit(x_train, y_train)
 
     train_predictions = clf.predict(x_train)
     correct = train_predictions == y_train
+
+    indices = (correct == False).nonzero()
+    wrong_numbers = x_train[indices]
+    wrong_labels = y_train[indices]
+    plot_numbers(wrong_numbers, wrong_labels)
+
     score = np.sum(correct) / len(y_train)
 
     print('Train score (accuracy) is:', score)
@@ -58,6 +63,9 @@ def regression(model):
 
 
 if __name__ == '__main__':
+    x_train, y_train = load_data('dataset_numbers_train.npy')
+    plot_numbers(x_train, y_train)
+
     print('Logistical regression:')
     regression(LogisticRegression(random_state=0))
 
