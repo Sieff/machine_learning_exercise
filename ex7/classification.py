@@ -30,7 +30,8 @@ def classify(x_train, y_train, x_test, y_test):
     clf.fit(x_train, y_train)
 
     print(clf.best_params_)
-    print(clf.score(x_test, y_test))
+    print("Training accuracy:", clf.score(x_train, y_train))
+    print("Test accuracy:", clf.score(x_test, y_test))
 
 
 if __name__ == '__main__':
